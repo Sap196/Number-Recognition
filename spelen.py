@@ -1,9 +1,10 @@
 from main import *
 from tekenvlak import teken_cijfer
 
-model, loss_function, optimizer = init_model()
-batch = load_existing_modell(model=model)
-image = teken_cijfer()
+model, _, _ = init_model()
+batch = load_existing_modell(model)
 
-if image is not None:
-    print("Voorspelling:", predict(model, image))
+if batch == 0:
+    raise FileNotFoundError("Geen getraind checkpoint gevonden in de map models.")
+
+teken_cijfer(lambda image: predict(model, image.unsqueeze(0)).item())

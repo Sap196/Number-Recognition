@@ -1,4 +1,4 @@
-"""Teken met de muis en geef één MNIST-tensor terug."""
+"""Teken cijfers en bekijk hun voorspelling in hetzelfde venster."""
 
 import tkinter as tk
 
@@ -21,14 +21,13 @@ def _to_mnist_tensor(drawing):
     return ToTensor()(image)
 
 
-def teken_cijfer():
-    """Geef een tensor met vorm [1, 28, 28] terug, of None bij sluiten."""
+def teken_cijfer(voorspel):
+    """Roep voorspel(tensor) aan voor elke klik op Voorspel."""
     size = 280
     radius = 9
     drawing = Image.new("L", (size, size), 0)
     brush = ImageDraw.Draw(drawing)
     previous = None
-    result = None
 
     window = tk.Tk()
     window.title("Teken een cijfer")
@@ -67,12 +66,11 @@ def teken_cijfer():
         status.config(text="Teken één cijfer met je muis.")
 
     def submit():
-        nonlocal result
         if drawing.getbbox() is None:
             status.config(text="Teken eerst een cijfer.")
             return
-        result = _to_mnist_tensor(drawing)
-        window.destroy()
+        prediction = voorspel(_to_mnist_tensor(drawing))
+        status.config(text=f"Voorspelling: {prediction}")
 
     canvas.bind("<Button-1>", start_stroke)
     canvas.bind("<B1-Motion>", paint)
@@ -80,9 +78,8 @@ def teken_cijfer():
     buttons = tk.Frame(window)
     buttons.pack(pady=(8, 12))
     tk.Button(buttons, text="Wis", command=clear).pack(side="left", padx=4)
-    tk.Button(buttons, text="Gebruik tekening", command=submit).pack(
+    tk.Button(buttons, text="Voorspel", command=submit).pack(
         side="left", padx=4
     )
 
     window.mainloop()
-    return result
